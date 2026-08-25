@@ -1,0 +1,141 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<!-- Как в шаблоне. Если Unity Mod Manager откажется грузить сборку
+		     ("Bad IL format" / не найден System.Runtime), поменяйте на net472
+		     или net481 — Unity-моды традиционно собираются под .NET Framework. -->
+		<TargetFramework>netstandard2.1</TargetFramework>
+
+		<!-- В шаблоне enable, но здесь ОБЯЗАТЕЛЬНО disable:
+		     неявный "using System" делает имя Object неоднозначным
+		     (System.Object против UnityEngine.Object), а в Assets.cs
+		     используется UnityEngine.Object.Destroy. -->
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+
+		<!-- В проекте есть свой Properties\AssemblyInfo.cs, поэтому
+		     запрещаем SDK генерировать второй такой же набор атрибутов
+		     (иначе ошибка CS0579: duplicate AssemblyTitleAttribute). -->
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+		<AssemblyName>RIHaKeyVisualizer</AssemblyName>
+		<RootNamespace>RIHaKeyVisualizer</RootNamespace>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<ModName>RIHaKeyVisualizer</ModName>
+		<GameExePath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/A Dance of Fire and Ice</GameExePath>
+		<Autostart>false</Autostart>
+		<AutoCopy>true</AutoCopy>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<DependencyMode Condition="'$(DependencyMode)' == '' OR '$(DependencyMode)' == 'DEPENDENCY_MODE_PLACEHOLDER'">GamePath</DependencyMode>
+		<IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+		<IsUnix Condition="'$(OS)' != 'Windows_NT'">true</IsUnix>
+		<PathSeparator Condition="'$(IsWindows)' == 'true'">\</PathSeparator>
+		<PathSeparator Condition="'$(IsUnix)' == 'true'">/</PathSeparator>
+		<LocalManagedAssembliesDir Condition="'$(LocalManagedAssembliesDir)' == ''">$(MSBuildProjectDirectory)$(PathSeparator)lib$(PathSeparator)Managed</LocalManagedAssembliesDir>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(GameExePath)' != '' AND '$(GameExePath)' != 'GAME_EXE_PATH_PLACEHOLDER'">
+        <GameDir>$([System.IO.Path]::GetDirectoryName('$(GameExePath)'))</GameDir>
+		<GameModsDir>$(GameDir)$(PathSeparator)Mods</GameModsDir>
+		<ModDir>$(GameModsDir)$(PathSeparator)$(ModName)</ModDir>
+        <GameFileName>$([System.IO.Path]::GetFileNameWithoutExtension('$(GameExePath)'))</GameFileName>
+        <GameManagedAssembliesDir>$(GameDir)$(PathSeparator)$(GameFileName)_Data$(PathSeparator)Managed</GameManagedAssembliesDir>
+    </PropertyGroup>
+
+	<!-- References -->
+	<ItemGroup>
+		<!-- Unity Mod Manager и Harmony: загрузка мода, патчи игры -->
+		<Reference Include="0Harmony">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityModManager/0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityModManager">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityModManager/UnityModManager.dll</HintPath>
+		</Reference>
+
+		<!-- Код самой игры: scrController, scnEditor, scrUIController,
+		     scrLoader, scnCalibration, scrSfx, Releases, ADOStartup, RDInput -->
+		<Reference Include="Assembly-CSharp">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/Assembly-CSharp.dll</HintPath>
+		</Reference>
+		<Reference Include="Assembly-CSharp-firstpass">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/Assembly-CSharp-firstpass.dll</HintPath>
+		</Reference>
+
+		<!-- RDTools: extension-методы WithAlpha, LocalMoveXY, ScaleXY -->
+		<Reference Include="RDTools">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/RDTools.dll</HintPath>
+		</Reference>
+
+		<!-- DOTween: используется кодом игры, к которому обращается мод -->
+		<Reference Include="DOTween">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/DOTween.dll</HintPath>
+		</Reference>
+		<Reference Include="DOTweenPro">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/DOTweenPro.dll</HintPath>
+		</Reference>
+
+		<!-- TextMeshPro: текст с названиями нажатых клавиш над риха -->
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+
+		<!-- Unity -->
+		<Reference Include="UnityEngine">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<!-- окно настроек UMM (GUILayout) -->
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.IMGUIModule.dll</HintPath>
+		</Reference>
+		<!-- Input.GetKey для опроса клавиш -->
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.InputLegacyModule.dll</HintPath>
+		</Reference>
+		<!-- AssetBundle со стандартными спрайтами риха -->
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.AssetBundleModule.dll</HintPath>
+		</Reference>
+		<!-- Texture2D.LoadImage: загрузка своих PNG/JPG с диска -->
+		<Reference Include="UnityEngine.ImageConversionModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.ImageConversionModule.dll</HintPath>
+		</Reference>
+		<!-- Canvas, Image, CanvasScaler, CanvasGroup, Outline, Shadow, GraphicRaycaster -->
+		<Reference Include="UnityEngine.UI">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UIModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.UIModule.dll</HintPath>
+		</Reference>
+		<!-- звуки RiHaActivate / RiHaDeactivate -->
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>/home/deck/steamcopy/steamapps/common/A Dance of Fire and Ice/ADanceOfFireAndIce_Data/Managed/UnityEngine.TextRenderingModule.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+	<!-- PNG — это ресурсы мода, компилировать их не нужно,
+	     они копируются в папку мода таргетом Copy ниже. -->
+	<ItemGroup>
+		<None Remove="*.png" />
+	</ItemGroup>
+
+	<!-- Копирование готового мода прямо в папку Mods игры -->
+	<Target Name="Copy" AfterTargets="Build" Condition="'$(AutoCopy)' == 'true'">
+		<MakeDir Directories="$(ModDir)" Condition="!Exists('$(ModDir)')" />
+		<Copy SourceFiles="Info.json" DestinationFolder="$(ModDir)"/>
+		<Copy SourceFiles="riha_on.png;riha_left.png;riha_right.png;riha_off.png" DestinationFolder="$(ModDir)"/>
+		<Copy SourceFiles="$(TargetDir)\$(TargetFileName)" DestinationFolder="$(ModDir)"/>
+		<Message Importance="high" Text="$(TargetDir)\$(TargetFileName) -&gt; $(GameModsDir)" />
+	</Target>
+
+	<Target Name="GameLaunch" AfterTargets="Copy">
+		<Exec Command="start &quot;&quot; /D &quot;$(GameDir)&quot; &quot;$(GameExePath)&quot;" IgnoreExitCode="true" Condition="'$(Autostart)' == 'true'" />
+	</Target>
+
+</Project>

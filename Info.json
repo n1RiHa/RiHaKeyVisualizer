@@ -1,0 +1,9 @@
+{
+  "Id": "RIHaKeyVisualizer",
+  "DisplayName": "RIHa Key Visualizer",
+  "Author": "n_RiHa",
+  "Version": "3.0.0",
+  "ManagerVersion": "0.27.0",
+  "AssemblyName": "RIHaKeyVisualizer.dll",
+  "EntryMethod": "RIHaKeyVisualizer.Main.Load"
+}
